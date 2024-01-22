@@ -1,0 +1,113 @@
+
+-- Drop tables if they exist
+DROP TABLE IF EXISTS Students;
+DROP TABLE IF EXISTS Classrooms;
+DROP TABLE IF EXISTS Courses;
+DROP TABLE IF EXISTS Teachers;
+
+-- Classrooms table
+CREATE TABLE Classrooms (
+    classroom_id INT PRIMARY KEY,
+    classroom_name VARCHAR(50),
+    teacher_id INT
+);
+
+-- Students table
+CREATE TABLE Students (
+    student_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    classroom_id INT,
+    grade INT,
+    gender VARCHAR(10),
+    FOREIGN KEY (classroom_id) REFERENCES Classrooms(classroom_id)
+);
+
+-- Create a new table named "Courses"
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY,
+    CourseName VARCHAR(50)
+);
+
+-- Add a foreign key constraint in the "Students" table referencing the "CourseID" in the "Courses" table
+ALTER TABLE Students
+ADD COLUMN CourseID INT,
+ADD CONSTRAINT fk_course FOREIGN KEY (CourseID) REFERENCES Courses(CourseID);
+
+
+
+-- Add a new column "Gender" to the Students table
+ALTER TABLE Students
+ADD COLUMN gender VARCHAR(10);
+
+-- Insert at least 5 records into the Students table
+INSERT INTO Students (first_name, last_name, classroom_id, grade, gender)
+VALUES
+    ('John', 'Doe', 1, 90, 'Male'),
+    ('Jane', 'Smith', 2, 85, 'Female'),
+    ('Bob', 'Johnson', 1, 92, 'Male'),
+    ('Alice', 'Williams', 3, 88, 'Female'),
+    ('Charlie', 'Brown', 2, 95, 'Male');
+
+-- Update the age of students in class 10 to 16
+UPDATE Students
+SET grade = grade + 1
+WHERE classroom_id = 10 AND grade BETWEEN 10 AND 16;
+
+-- Delete records of students with age less than 10
+DELETE FROM Students
+WHERE grade < 10;
+
+-- SELECT query to retrieve FirstName, LastName, and Age of all students
+SELECT first_name AS "FirstName", last_name AS "LastName", grade AS "Age"
+FROM Students;
+
+-- Use aggregate functions to find the average age of all students
+SELECT AVG(grade) AS "AverageAge"
+FROM Students;
+
+-- Explain the concept of a primary key and ensure StudentID is a primary key
+-- A primary key is a unique identifier for each record in a table. It ensures data integrity and uniqueness.
+-- In the Students table, student_id is set as the primary key.
+
+-- Create the Courses table
+CREATE TABLE Courses (
+    course_id SERIAL PRIMARY KEY,
+    course_name VARCHAR(50)
+);
+
+-- Add a foreign key constraint in the Students table referencing CourseID in Courses table
+ALTER TABLE Students
+ADD COLUMN course_id INT REFERENCES Courses(course_id);
+
+-- SQL queries for additional tasks:
+
+-- List all students with their respective classrooms and teacher names
+SELECT s.student_id, s.first_name, s.last_name, c.classroom_name, c.teacher_id
+FROM Students s
+JOIN Classrooms c ON s.classroom_id = c.classroom_id;
+
+-- Show the average grade for each classroom. Display the classroom name and the average grade.
+SELECT c.classroom_name, AVG(s.grade) AS "AverageGrade"
+FROM Students s
+JOIN Classrooms c ON s.classroom_id = c.classroom_id
+GROUP BY c.classroom_name;
+
+-- Find the names of students who belong to a classroom taught by a specific teacher (teacher_id = 1)
+SELECT s.first_name, s.last_name
+FROM Students s
+JOIN Classrooms c ON s.classroom_id = c.classroom_id
+WHERE c.teacher_id = 1;
+
+-- List all classrooms along with the number of students in each classroom
+SELECT c.classroom_name, COUNT(s.student_id) AS "NumberOfStudents"
+FROM Classrooms c
+LEFT JOIN Students s ON c.classroom_id = s.classroom_id
+GROUP BY c.classroom_name;
+
+-- Show the details of classrooms that have an average grade above a certain value (e.g., 90)
+SELECT c.classroom_name, AVG(s.grade) AS "AverageGrade"
+FROM Students s
+JOIN Classrooms c ON s.classroom_id = c.classroom_id
+GROUP BY c.classroom_name
+HAVING AVG(s.grade) > 90;
